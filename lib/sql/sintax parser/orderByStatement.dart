@@ -1,3 +1,7 @@
+import 'package:console/sql/sintax%20parser/sqlParser.dart';
+
+import 'orderByStatementUnit.dart';
+
 class OrderByStatement {
 
   List<OrderByStatementUnit> statements = [];
