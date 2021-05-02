@@ -1,3 +1,5 @@
+import 'package:console/stringUtil.dart';
+
 var singleVarPat = r'[a-z][a-z0-9]*(\.[a-z][a-z0-9]*)?';
 var numberPat = r'[0-9]+(\.[0-9]+)?';
 var stringValuePat = r"'.*?'";
@@ -5,14 +7,14 @@ var whereOperatorPat = r'(=|>|<|<=|>=|<>|like|(not\s+)?in)';
 var multipleVarPat = patSeparatedByComma(singleVarPat);
 var columnListOrAll = r'(?<columns>(' + multipleVarPat + r'|\*))';
 var whereComparatorPat =
-    '$singleVarPat\\s+$whereOperatorPat\\s+($numberPat|$stringValuePat|$singleVarPat)';
+    '(?<whereColumn>$singleVarPat)\\s+(?<whereOperator>$whereOperatorPat)\\s+(?<whereValue>$numberPat|$stringValuePat|$singleVarPat)';
 var whereExpressionPat =
     '$whereComparatorPat(\\s+(and|or)\\s+$whereComparatorPat)*';
 var wherePat = '(?<where>\\s+where\\s+$whereExpressionPat)?';
-var singleJoinPat = 'join\\s+$singleVarPat\\s+on\\s+$whereExpressionPat';
+var singleJoinPat = 'join\\s+(?<joinTable>$singleVarPat)\\s+on\\s+(?<joinCondition>$whereExpressionPat)';
 var nonOptionalJoinPat = '$singleJoinPat(\\s+$singleJoinPat)*';
 var joinPat = '(?<join>\\s+$nonOptionalJoinPat)?';
-var orderByUnitPat = patSeparatedByComma('$singleVarPat(\\s+(desc|asc))?');
+var orderByUnitPat = patSeparatedByComma('(?<orderByColumn>$singleVarPat)(\\s+(?<orderBySort>desc|asc))?');
 var orderByPat = r'(?<orderby>\s+order\s+by\s+' + orderByUnitPat + r')?';
 var sqlPat = RegExp(
     '^select\\s+$columnListOrAll\\s+from\\s+(?<table>$singleVarPat)$joinPat$wherePat$orderByPat\\s*;?\$',
@@ -20,54 +22,6 @@ var sqlPat = RegExp(
 
 String patSeparatedByComma(String pat) {
   return pat + r'(\s*,\s*' + pat + ')*';
-}
-
-class JoinStatementUnit {
-  String originTable, joinedTable;
-  WhereStatement where;
-}
-
-class JoinStatement {
-
-  List<JoinStatementUnit> statement;
-
-  JoinStatement (String statement) {
-
-  }
-
-}
-
-class OrderByStatementUnit {
-  String column;
-  bool asc;
-}
-
-class OrderByStatement {
-
-  List<OrderByStatementUnit> statements;
-
-  OrderByStatement (String statement) {
-
-  }
-
-}
-
-class WhereStatement {
-
-  dynamic left;
-  bool and;
-  dynamic right;
-
-  WhereStatement (String statement) {
-
-  }
-
-}
-
-class WhereStatementUnit {
-  String column;
-  String op;
-  String value;
 }
 
 class SqlParser {
