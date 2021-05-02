@@ -1,3 +1,7 @@
+import 'package:console/sql/sintax%20parser/sqlParser.dart';
+
+import 'joinStatementUnit.dart';
+
 class JoinStatement {
 
   List<JoinStatementUnit> statement = [];
