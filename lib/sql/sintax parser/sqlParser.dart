@@ -1,4 +1,7 @@
-import 'package:console/stringUtil.dart';
+import 'package:console/sql/sintax%20parser/whereStatement.dart';
+
+import 'joinStatement.dart';
+import 'orderByStatement.dart';
 
 var singleVarPat = r'[a-z][a-z0-9]*(\.[a-z][a-z0-9]*)?';
 var numberPat = r'[0-9]+(\.[0-9]+)?';
