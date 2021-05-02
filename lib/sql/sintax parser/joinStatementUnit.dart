@@ -1,3 +1,5 @@
+import 'package:console/sql/sintax%20parser/whereStatement.dart';
+
 class JoinStatementUnit {
 
   String joinedTable;
