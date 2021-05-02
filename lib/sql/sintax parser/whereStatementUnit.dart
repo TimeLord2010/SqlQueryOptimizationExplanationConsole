@@ -1,3 +1,5 @@
+import 'package:console/sql/sintax%20parser/sqlParser.dart';
+
 class WhereStatementUnit {
 
   String column;
@@ -6,10 +8,10 @@ class WhereStatementUnit {
 
   WhereStatementUnit (String s) {
     var whereComparatorRegExp = RegExp(whereComparatorPat);
-    var matches = whereComparatorRegExp.allMatches(s)
-    for (var match in matches) {
-      
-    }
+    var match = whereComparatorRegExp.firstMatch(s);
+    column = match.namedGroup('whereColumn');
+    op = match.namedGroup('whereOperator');
+    value = match.namedGroup('whereValue');
   }
 
 }
