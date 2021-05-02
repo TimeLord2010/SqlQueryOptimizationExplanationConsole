@@ -1,3 +1,7 @@
+import 'package:console/sql/sintax%20parser/whereStatementUnit.dart';
+
+import '../../stringUtil.dart';
+
 class WhereStatement {
 
   dynamic left;
@@ -12,7 +16,7 @@ class WhereStatement {
       right = WhereStatement(parts[1]);
       return;
     }
-    parts = splitOnce(statement, RegExp('or', caseSensitive: false))
+    parts = splitOnce(statement, RegExp('or', caseSensitive: false));
     if (parts.length == 2) {
       left = WhereStatement(parts[0]);
       and = false;
