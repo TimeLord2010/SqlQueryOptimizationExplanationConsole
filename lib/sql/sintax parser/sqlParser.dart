@@ -9,15 +9,13 @@ var stringValuePat = r"'.*?'";
 var whereOperatorPat = r'(=|>|<|<=|>=|<>|like|(not\s+)?in)';
 var multipleVarPat = patSeparatedByComma(singleVarPat);
 var columnListOrAll = r'(?<columns>(' + multipleVarPat + r'|\*))';
-var whereComparatorPat =
-    '(?<whereColumn>$singleVarPat)\\s+(?<whereOperator>$whereOperatorPat)\\s+(?<whereValue>$numberPat|$stringValuePat|$singleVarPat)';
-var whereExpressionPat =
-    '$whereComparatorPat(\\s+(and|or)\\s+$whereComparatorPat)*';
+var whereComparatorPat = '$singleVarPat\\s+$whereOperatorPat\\s+($numberPat|$stringValuePat|$singleVarPat)';
+var whereExpressionPat = '$whereComparatorPat(\\s+(and|or)\\s+$whereComparatorPat)*';
 var wherePat = '(?<where>\\s+where\\s+$whereExpressionPat)?';
-var singleJoinPat = 'join\\s+(?<joinTable>$singleVarPat)\\s+on\\s+(?<joinCondition>$whereExpressionPat)';
+var singleJoinPat = 'join\\s+$singleVarPat\\s+on\\s+$whereExpressionPat';
 var nonOptionalJoinPat = '$singleJoinPat(\\s+$singleJoinPat)*';
 var joinPat = '(?<join>\\s+$nonOptionalJoinPat)?';
-var orderByUnitPat = patSeparatedByComma('(?<orderByColumn>$singleVarPat)(\\s+(?<orderBySort>desc|asc))?');
+var orderByUnitPat = patSeparatedByComma('($singleVarPat)(\\s+(desc|asc))?');
 var orderByPat = r'(?<orderby>\s+order\s+by\s+' + orderByUnitPat + r')?';
 var sqlPat = RegExp(
     '^select\\s+$columnListOrAll\\s+from\\s+(?<table>$singleVarPat)$joinPat$wherePat$orderByPat\\s*;?\$',
@@ -48,10 +46,21 @@ class SqlParser {
     var tableGroup = match.namedGroup('table');
     table = tableGroup;
     var joinGroup = match.namedGroup('join');
-    join = JoinStatement(joinGroup);
+    if (joinGroup != null) join = JoinStatement(joinGroup);
     var whereGroup = match.namedGroup('where');
-    where = WhereStatement(whereGroup);
+    if (whereGroup != null) where = WhereStatement(whereGroup);
     var orderGroup = match.namedGroup('orderby');
-    orderBy = OrderByStatement(orderGroup);
+    if (orderGroup != null) orderBy = OrderByStatement(orderGroup);
+  }
+
+  Map<String, dynamic> toJson () {
+    return {
+      'sql': sql,
+      'columns': columns,
+      'table': table,
+      'join': join?.toJson(),
+      'where': where?.toJson(),
+      'orderBy': orderBy?.toJson()
+    };
   }
 }
