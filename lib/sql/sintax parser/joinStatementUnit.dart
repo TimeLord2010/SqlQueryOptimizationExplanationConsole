@@ -10,4 +10,11 @@ class JoinStatementUnit {
     where = WhereStatement(match.namedGroup('joinCondition'));
   }
 
+  Map<String, dynamic> toJson () {
+    return {
+      'joinedTable': joinedTable,
+      'where': where.toJson()
+    };
+  }
+
 }
