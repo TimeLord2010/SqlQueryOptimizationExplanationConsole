@@ -27,4 +27,18 @@ class WhereStatement {
     and = null;
   }
 
+  Map<String, dynamic> toJson() {
+    var result = <String, dynamic>{};
+    if (left is WhereStatementUnit || left is WhereStatement) {
+      result['left'] = left.toJson();
+    } else {
+      result['left'] = 'Invalid type for left';
+    }
+    if (right is WhereStatement || right is WhereStatementUnit) {
+      result['and'] = and;
+      result['right'] = right.toJson();
+    }
+    return result;
+  }
+
 }
