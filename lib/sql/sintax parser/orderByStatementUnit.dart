@@ -8,4 +8,11 @@ class OrderByStatementUnit {
     asc = match.namedGroup('orderBySort') == 'asc';
   }
 
+  Map<String, dynamic> toJson() {
+    return {
+      'column': column,
+      'asc': asc
+    };
+  }
+
 }
