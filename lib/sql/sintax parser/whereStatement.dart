@@ -27,6 +27,28 @@ class WhereStatement {
     and = null;
   }
 
+  Set<String> getTables () {
+    var tables = <String>{};
+    if (left is WhereStatement || left is WhereStatementUnit) {
+      tables.addAll(left.getTables());
+    }
+    if (right is WhereStatement || right is WhereStatementUnit) {
+      tables.addAll(right.getTables());
+    }
+    return tables;
+  }
+
+  Set<String> getColumns () {
+    var columns = <String>{};
+    if (left is WhereStatement || left is WhereStatementUnit) {
+      columns.addAll(left.getColumns());
+    }
+    if (right is WhereStatement || right is WhereStatementUnit) {
+      columns.addAll(right.getColumns());
+    }
+    return columns;
+  }
+
   Map<String, dynamic> toJson() {
     var result = <String, dynamic>{};
     if (left is WhereStatementUnit || left is WhereStatement) {
