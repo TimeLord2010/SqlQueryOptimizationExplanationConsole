@@ -18,4 +18,20 @@ class OrderByStatement {
     return statements.map((e) => e.toJson()).toList();
   }
 
+  Set<String> getTables() {
+    var tables = <String>{};
+    for (var unit in statements) {
+      tables.add(unit.getTable());
+    }
+    return tables;
+  }
+
+  Set<String> getColumns () {
+    var columns = <String>{};
+    for (var unit in statements) {
+      columns.add(unit.column);
+    }
+    return columns;
+  }
+
 }
