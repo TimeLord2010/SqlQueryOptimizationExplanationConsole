@@ -15,4 +15,12 @@ class OrderByStatementUnit {
     };
   }
 
+  String getTable() {
+    if (column.contains('.')) {
+      var parts = column.split('.');
+      return parts.first;
+    }
+    return null;
+  }
+
 }
