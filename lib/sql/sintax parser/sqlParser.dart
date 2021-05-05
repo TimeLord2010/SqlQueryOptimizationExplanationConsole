@@ -3,9 +3,11 @@ import 'package:console/sql/sintax%20parser/whereStatement.dart';
 import 'joinStatement.dart';
 import 'orderByStatement.dart';
 
-var singleVarPat = r'[a-z][a-z0-9]*(\.[a-z][a-z0-9]*)?';
+var letters = r'a-zú_';
+var singleVarPat = '[' + letters + '][' + letters + r'0-9]*(\.[' + letters + '][' + letters + '0-9]*)?';
+//var singleVarPat = r'[a-z][a-z0-9]*(\.[a-z][a-z0-9]*)?';
 var numberPat = r'[0-9]+(\.[0-9]+)?';
-var stringValuePat = r"'.*?'";
+var stringValuePat = r"'[^']*?'";
 var whereOperatorPat = r'(=|>|<|<=|>=|<>|like|(not\s+)?in)';
 var multipleVarPat = patSeparatedByComma(singleVarPat);
 var columnListOrAll = r'(?<columns>(' + multipleVarPat + r'|\*))';
@@ -19,6 +21,7 @@ var orderByUnitPat = patSeparatedByComma('($singleVarPat)(\\s+(desc|asc))?');
 var orderByPat = r'(?<orderby>\s+order\s+by\s+' + orderByUnitPat + r')?';
 var sqlPat = RegExp(
     '^select\\s+$columnListOrAll\\s+from\\s+(?<table>$singleVarPat)$joinPat$wherePat$orderByPat\\s*;?\$',
+    dotAll: true,
     caseSensitive: false);
 
 String patSeparatedByComma(String pat) {
@@ -51,6 +54,21 @@ class SqlParser {
     if (whereGroup != null) where = WhereStatement(whereGroup);
     var orderGroup = match.namedGroup('orderby');
     if (orderGroup != null) orderBy = OrderByStatement(orderGroup);
+  }
+
+  Set<String> getTables () {
+    var tables = <String>{};
+    tables.add(table);
+    if (join != null) {
+      tables.addAll(join.getTables());
+    }
+    if (where != null) {
+      tables.addAll(where.getTables());
+    }
+    if (orderBy != null) {
+      tables.addAll(orderBy.getTables());
+    }
+    return tables;
   }
 
   Map<String, dynamic> toJson () {
