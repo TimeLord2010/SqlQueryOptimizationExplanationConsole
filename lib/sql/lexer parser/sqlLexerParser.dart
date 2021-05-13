@@ -106,5 +106,4 @@ Future checkLexaly(SqlParser sqlParser) async {
     checkColumnLexaly(tablesInfo, sqlParser.orderBy.getColumns());
   }
   checkColumnLexaly(tablesInfo, sqlParser.columns);
-  return true;
 }
