@@ -1,9 +1,9 @@
 import 'package:console/sql/sintax%20parser/sqlParser.dart';
+import 'package:console/sql/sintax%20parser/whereStatement.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-var dbmetadata_url =
-    'https://8n242oo4sj.execute-api.sa-east-1.amazonaws.com/prod/mysql/getmetadata';
+var dbmetadata_url = 'https://8n242oo4sj.execute-api.sa-east-1.amazonaws.com/prod/mysql/getmetadata';
 
 Future<List<TableInfo>> getDatabaseMetaData() async {
   var response = await http.post(Uri.parse(dbmetadata_url));
@@ -65,10 +65,7 @@ void checkColumnLexaly(List<TableInfo> tablesInfo, column) {
     var table_name = table_column[0];
     checkTableLexaly(tablesInfo, table_name);
   } else {
-    var column_count = tablesInfo
-        .where((element) =>
-            element.columns.any((columnInfo) => columnInfo.name == column))
-        .length;
+    var column_count = tablesInfo.where((element) => element.columns.any((columnInfo) => columnInfo.name == column)).length;
     if (column_count == 0) {
       throw Exception('Column $column does not exist in any table.');
     } else if (column_count != 1) {
@@ -90,6 +87,35 @@ void checkTableLexaly(List<TableInfo> tablesInfo, table) {
   }
 }
 
+String getColumnWithTable(String column, List<TableInfo> tablesInfo) {
+  if (column == null) throw Exception('null column name.');
+  if (column.contains('.')) return column;
+  var tablesWhereColumnAppears = tablesInfo.where((element) => element.columns.any((columnInfo) => columnInfo.name == column));
+  if (tablesWhereColumnAppears.isEmpty) {
+    throw Exception('Column $column does not exist in any table.');
+  } else if (tablesWhereColumnAppears.length != 1) {
+    throw Exception('Ambiguous column $column.');
+  } else {
+    var table = tablesWhereColumnAppears.elementAt(0);
+    return column + '.' + table.table;
+  }
+}
+
+void makeTableNameExplicit(SqlParser parser, List<TableInfo> tablesInfo) {
+  for (var i = 0; i < parser.columns.length; i++) {
+    parser.columns[i] = getColumnWithTable(parser.columns[i], tablesInfo);
+  }
+  for (var i = 0; i < parser.join.statement.length; i++) {
+    var st = parser.join.statement[i];
+    WhereStatement.loop(st.where, (unit) => unit.column = getColumnWithTable(unit.column, tablesInfo));
+  }
+  WhereStatement.loop(parser.where, (unit) => unit.column = getColumnWithTable(unit.column, tablesInfo));
+  for (var i = 0; i < parser.orderBy.statements.length; i++) {
+    var st = parser.orderBy.statements[i];
+    st.column = getColumnWithTable(st.column, tablesInfo);
+  }
+}
+
 Future checkLexaly(SqlParser sqlParser) async {
   var tablesInfo = await getRelevantTableInfo(sqlParser);
   checkTableLexaly(tablesInfo, sqlParser.table);
@@ -106,4 +132,5 @@ Future checkLexaly(SqlParser sqlParser) async {
     checkColumnLexaly(tablesInfo, sqlParser.orderBy.getColumns());
   }
   checkColumnLexaly(tablesInfo, sqlParser.columns);
+  return true;
 }
