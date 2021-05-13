@@ -63,4 +63,17 @@ class WhereStatement {
     return result;
   }
 
+  static void loop (WhereStatement where, Function(WhereStatementUnit) func) {
+    if (where.left is WhereStatement) {
+      loop(where, func);
+    } else if (where.left is WhereStatementUnit) {
+      func(where.left);
+    }
+    if (where.right is WhereStatement) {
+      loop(where.right, func);
+    } else if (where.right is WhereStatementUnit) {
+      func(where.right);
+    }
+  }
+
 }
