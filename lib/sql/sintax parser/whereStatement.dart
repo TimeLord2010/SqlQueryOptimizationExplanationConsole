@@ -3,20 +3,19 @@ import 'package:console/sql/sintax%20parser/whereStatementUnit.dart';
 import '../../stringUtil.dart';
 
 class WhereStatement {
-
   dynamic left;
   bool and;
   dynamic right;
 
-  WhereStatement (String statement) {
-    var parts = splitOnce(statement, RegExp('and', caseSensitive: false));
+  WhereStatement(String statement) {
+    var parts = splitOnce(statement, RegExp(' and ', caseSensitive: false));
     if (parts.length == 2) {
       left = WhereStatement(parts[0]);
       and = true;
       right = WhereStatement(parts[1]);
       return;
     }
-    parts = splitOnce(statement, RegExp('or', caseSensitive: false));
+    parts = splitOnce(statement, RegExp(' or ', caseSensitive: false));
     if (parts.length == 2) {
       left = WhereStatement(parts[0]);
       and = false;
@@ -25,9 +24,10 @@ class WhereStatement {
     }
     left = WhereStatementUnit(statement);
     and = null;
+    right = null;
   }
 
-  Set<String> getTables () {
+  Set<String> getTables() {
     var tables = <String>{};
     if (left is WhereStatement || left is WhereStatementUnit) {
       tables.addAll(left.getTables());
@@ -38,7 +38,7 @@ class WhereStatement {
     return tables;
   }
 
-  Set<String> getColumns () {
+  Set<String> getColumns() {
     var columns = <String>{};
     if (left is WhereStatement || left is WhereStatementUnit) {
       columns.addAll(left.getColumns());
@@ -63,7 +63,8 @@ class WhereStatement {
     return result;
   }
 
-  static void loop (WhereStatement where, Function(WhereStatementUnit) func) {
+  static void loop(WhereStatement where, Function(WhereStatementUnit) func) {
+    if (where == null) return;
     if (where.left is WhereStatement) {
       loop(where, func);
     } else if (where.left is WhereStatementUnit) {
@@ -75,5 +76,4 @@ class WhereStatement {
       func(where.right);
     }
   }
-
 }
