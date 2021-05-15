@@ -89,7 +89,7 @@ void checkTableLexaly(List<TableInfo> tablesInfo, table) {
 
 String getColumnWithTable(String column, List<TableInfo> tablesInfo) {
   if (column == null) throw Exception('null column name.');
-  if (column.contains('.')) return column;
+  if (column.contains('.') || column == '*') return column;
   var tablesWhereColumnAppears = tablesInfo.where((element) => element.columns.any((columnInfo) => columnInfo.name == column));
   if (tablesWhereColumnAppears.isEmpty) {
     throw Exception('Column $column does not exist in any table.');
@@ -97,7 +97,7 @@ String getColumnWithTable(String column, List<TableInfo> tablesInfo) {
     throw Exception('Ambiguous column $column.');
   } else {
     var table = tablesWhereColumnAppears.elementAt(0);
-    return column + '.' + table.table;
+    return table.table + '.' + column;
   }
 }
 
@@ -105,12 +105,12 @@ void makeTableNameExplicit(SqlParser parser, List<TableInfo> tablesInfo) {
   for (var i = 0; i < parser.columns.length; i++) {
     parser.columns[i] = getColumnWithTable(parser.columns[i], tablesInfo);
   }
-  for (var i = 0; i < parser.join.statement.length; i++) {
+  for (var i = 0;parser.join != null && i < parser.join.statement.length; i++) {
     var st = parser.join.statement[i];
     WhereStatement.loop(st.where, (unit) => unit.column = getColumnWithTable(unit.column, tablesInfo));
   }
   WhereStatement.loop(parser.where, (unit) => unit.column = getColumnWithTable(unit.column, tablesInfo));
-  for (var i = 0; i < parser.orderBy.statements.length; i++) {
+  for (var i = 0;parser.orderBy != null && i < parser.orderBy.statements.length; i++) {
     var st = parser.orderBy.statements[i];
     st.column = getColumnWithTable(st.column, tablesInfo);
   }
@@ -118,6 +118,17 @@ void makeTableNameExplicit(SqlParser parser, List<TableInfo> tablesInfo) {
 
 Future checkLexaly(SqlParser sqlParser) async {
   var tablesInfo = await getRelevantTableInfo(sqlParser);
+  if (sqlParser.columns.length == 1 && sqlParser.columns[0] == '*') {
+    var newColumns = <String>{};
+    tablesInfo.forEach((tableInfo) {
+      tableInfo.columns.forEach((column) { 
+        newColumns.add(column.name);
+      });
+    });
+    sqlParser.columns = newColumns.toList();
+  }
+  makeTableNameExplicit(sqlParser, tablesInfo);
+  print(sqlParser.toString());
   checkTableLexaly(tablesInfo, sqlParser.table);
   if (sqlParser.join != null) {
     checkTableLexaly(tablesInfo, sqlParser.join.getTables());
