@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:console/sql/sintax%20parser/whereStatement.dart';
 
 import 'joinStatement.dart';
@@ -80,5 +82,11 @@ class SqlParser {
       'where': where?.toJson(),
       'orderBy': orderBy?.toJson()
     };
+  }
+
+  @override
+  String toString() {
+    var encoder = JsonEncoder.withIndent('     ');
+    return encoder.convert(toJson());
   }
 }
