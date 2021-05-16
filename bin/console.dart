@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:console/console.dart' as console;
-import 'package:console/relationalAlgebra/relationalAlgebra.dart';
+import 'package:console/relationalAlgebra/util/raExpression.dart';
 import 'package:console/sql/sintax parser/sqlParser.dart';
 import 'package:console/sql/lexer parser/sqlLexerParser.dart';
 
@@ -16,7 +16,8 @@ Future processSqls(List<String> sqls) async {
     print(sql);
     var parser = SqlParser(sql);
     await checkLexaly(parser);
-    sqlToRelationalAlgebra(parser);
+    var ra = sqlToRelationalAlgebra(parser);
+	print(ra.toString());
     //var j = parser.toJson();
     //print(getPrettyJSONString(j));
     print('');
@@ -25,6 +26,12 @@ Future processSqls(List<String> sqls) async {
 
 void main(List<String> arguments) async {
   print('Hello world: ${console.calculate()}!');
+  var a = '';
+  a += 'select idMovimentacao, DataMovimentacao, Movimentacao.Descricao, TipoMovimento.DescMovimentacao, Categoria.DescCategoria, Contas.Descricao, Valor ';
+  a += 'from Movimentacao ';
+  a += 'join TipoMovimento on TipoMovimento.idTipoMovimento = Movimentacao.TipoMovimento_idTipoMovimento ';
+  a += 'join Categoria on Categoria.idCategoria = Movimentacao.Categoria_idCategoria ';
+  a += 'join Contas on Contas.idConta = Movimentacao.Contas_idConta;';
     var sts = [
     'select * from Usuario;',
     'select Nome, Número,Bairro , CEP from Usuario;',
@@ -32,6 +39,7 @@ void main(List<String> arguments) async {
     "select Nome, Número,Bairro , CEP from Usuario where CEP = '60' order by Número desc;",
     'select * from Movimentacao join Categoria on Movimentacao.Categoria_idCategoria = Categoria.idCategoria;',
     "select * from Movimentacao join Categoria on Movimentacao.Categoria_idCategoria = Categoria.idCategoria where DescCategoria = 'test' order by idCategoria desc;",
+	a
     // "select * from myTable1 join myTable2 on myTable1.CPF = myTable2.CPF where myTable1.Nome like 'vinicius%';",
     // "select * from myTable1 join myTable2 on myTable1.CPF = myTable2.CPF where myTable1.Nome like 'vinicius%' and col1 < 10;",
     // "select * from myTable1 join myTable2 on myTable1.CPF = myTable2.CPF where myTable1.Nome like 'vinicius%' order by myTable1.Age asc;",
