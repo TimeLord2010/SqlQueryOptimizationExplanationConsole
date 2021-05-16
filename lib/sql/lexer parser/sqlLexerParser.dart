@@ -128,7 +128,6 @@ Future checkLexaly(SqlParser sqlParser) async {
     sqlParser.columns = newColumns.toList();
   }
   makeTableNameExplicit(sqlParser, tablesInfo);
-  print(sqlParser.toString());
   checkTableLexaly(tablesInfo, sqlParser.table);
   if (sqlParser.join != null) {
     checkTableLexaly(tablesInfo, sqlParser.join.getTables());
