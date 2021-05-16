@@ -17,7 +17,7 @@ Future processSqls(List<String> sqls) async {
     var parser = SqlParser(sql);
     await checkLexaly(parser);
     var ra = sqlToRelationalAlgebra(parser);
-	print(ra.toString());
+    print(ra.toString());
     //var j = parser.toJson();
     //print(getPrettyJSONString(j));
     print('');
@@ -32,14 +32,14 @@ void main(List<String> arguments) async {
   a += 'join TipoMovimento on TipoMovimento.idTipoMovimento = Movimentacao.TipoMovimento_idTipoMovimento ';
   a += 'join Categoria on Categoria.idCategoria = Movimentacao.Categoria_idCategoria ';
   a += 'join Contas on Contas.idConta = Movimentacao.Contas_idConta;';
-    var sts = [
-    'select * from Usuario;',
-    'select Nome, Número,Bairro , CEP from Usuario;',
-    "select Nome, Número,Bairro , CEP from Usuario where CEP = '60';",
-    "select Nome, Número,Bairro , CEP from Usuario where CEP = '60' order by Número desc;",
-    'select * from Movimentacao join Categoria on Movimentacao.Categoria_idCategoria = Categoria.idCategoria;',
-    "select * from Movimentacao join Categoria on Movimentacao.Categoria_idCategoria = Categoria.idCategoria where DescCategoria = 'test' order by idCategoria desc;",
-	a
+  var sts = [
+    //'select * from Usuario;',
+    //'select Nome, Número,Bairro , CEP from Usuario;',
+    //"select Nome, Número,Bairro , CEP from Usuario where CEP = '60';",
+    //"select Nome, Número,Bairro , CEP from Usuario where CEP = '60' order by Número desc;",
+    //'select * from Movimentacao join Categoria on Movimentacao.Categoria_idCategoria = Categoria.idCategoria;',
+    //"select * from Movimentacao join Categoria on Movimentacao.Categoria_idCategoria = Categoria.idCategoria where DescCategoria = 'test' order by idCategoria desc;",
+    a
     // "select * from myTable1 join myTable2 on myTable1.CPF = myTable2.CPF where myTable1.Nome like 'vinicius%';",
     // "select * from myTable1 join myTable2 on myTable1.CPF = myTable2.CPF where myTable1.Nome like 'vinicius%' and col1 < 10;",
     // "select * from myTable1 join myTable2 on myTable1.CPF = myTable2.CPF where myTable1.Nome like 'vinicius%' order by myTable1.Age asc;",
@@ -49,7 +49,7 @@ void main(List<String> arguments) async {
     // "select myTable1.col1 from myTable1 join myTable2 on myTable1.CPF = myTable2.CPF where myTable1.Nome like 'vinicius%' order by myTable1.Age desc;",
     // "select myTable1.col1 from myTable1 join myTable2 on myTable1.CPF > 60 where myTable1.Nome like 'vinicius%' order by myTable1.Age desc;",
     // "select myTable1.col1 from myTable1 join myTable2 on myTable1.CPF > 60 join myTable3 on myTable1.Nome = myTable2.Nome where myTable1.Nome like 'vinicius%' or myTable2.Age < 20 and myTable3.Address <> null order by myTable1.Age desc, myTable2.Nome asc;",
-    
+
     //"select myTable1.col1 from myTable1 join myTable2 on myTable1.CPF > 60 join myTable3 on myTable1.Nome = myTable2.Nome where myTable1.Nome like 'vinicius%' or myTable2.Age < 20 and myTable3.Address <> null order by myTable1.Age desc, myTable2.Nome = '';",
   ];
   await processSqls(sts);
