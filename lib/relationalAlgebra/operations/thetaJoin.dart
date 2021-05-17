@@ -24,7 +24,7 @@ class ThetaJoin implements RArelationalOperator {
     throw UnimplementedError();
   }
 
-  static ThetaJoin lastTheta (ThetaJoin join) {
+  static ThetaJoin lastTheta(ThetaJoin join) {
     if (join.source is ThetaJoin) {
       return lastTheta(join.source);
     }
@@ -34,26 +34,59 @@ class ThetaJoin implements RArelationalOperator {
     return join;
   }
 
-  static ThetaJoin reverse (ThetaJoin join) {
-    print('reverse param: $join');
-    var joins = <ThetaJoin>[];
+  static ThetaJoin reverse(ThetaJoin join) {
+    var joins = <ThetaJoin>[join];
     while (join.source is ThetaJoin || join.source2 is ThetaJoin) {
       if (join.source is ThetaJoin) {
         joins.add(join.source);
-      } else if (join.source2) {
+        join = join.source;
+      } else if (join.source2 is ThetaJoin) {
         joins.add(join.source2);
+        join = join.source2;
       }
     }
-    print(joins);
-    for (var i = joins.length - 1; i >= 1; i--) {
+    var cache;
+    for (var i = joins.length - 1; i > 0; i--) {
       var currentJoin = joins[i];
-      var nextJoin = joins[i-1];
-      var oldSource = currentJoin.source;
-      currentJoin.source = nextJoin;
-      if (nextJoin.source == currentJoin) {
-        nextJoin.source = oldSource;
+      var nextJoin = joins[i - 1];
+      if (currentJoin.source is String && currentJoin.source2 is String) {
+        if (nextJoin.source is String) {
+          cache = nextJoin.source;
+          nextJoin.source = currentJoin.source;
+        } else if (nextJoin.source2 is String) {
+          cache = nextJoin.source2;
+          nextJoin.source2 = currentJoin.source;
+        } else {
+          throw Exception('Invalid theta join.');
+        }
+        currentJoin.source = nextJoin;
       } else {
-        nextJoin.source2 = oldSource;
+        if (currentJoin.source is ThetaJoin) {
+          currentJoin.source = nextJoin;
+        } else if (currentJoin.source2 is ThetaJoin) {
+          currentJoin.source2 = nextJoin;
+        } else {
+          throw Exception('Invalid theta join.');
+        }
+        if (i - 1 == 0) {
+          if (nextJoin.source is ThetaJoin) {
+            nextJoin.source = cache;
+          } else if (nextJoin.source2 is ThetaJoin) {
+            nextJoin.source2 = cache;
+          } else {
+            throw Exception('Invalid theta join.');
+          }
+        } else {
+          if (currentJoin.source is String) {
+            cache = currentJoin.source;
+            currentJoin.source = cache;
+          } else if (currentJoin.source2 is String) {
+            cache = currentJoin.source2;
+            currentJoin.source2 = cache;
+          } else {
+            throw Exception('Invalid theta join.');
+          }
+        }
       }
     }
     return joins.last;
@@ -86,8 +119,11 @@ class ThetaJoin implements RArelationalOperator {
     } else {
       throw Exception('Invalid type.');
     }
-    return reverse(theta);
-    //return theta;
+    return theta;
+  }
+
+  String basicString () {
+    return '(${source is ThetaJoin? "" : source})$symbol{$condition}(${source2 is ThetaJoin? "" : source2})';
   }
 
   @override
