@@ -2,7 +2,7 @@ import 'package:console/relationalAlgebra/util/raOperator.dart';
 import 'package:console/relationalAlgebra/util/raRelationalOperator.dart';
 
 class RAnavigator {
-
+  
   List<RAoperator> ancestors;
   RAoperator expression;
   int level = 0;
@@ -53,23 +53,37 @@ class RAnavigator {
     }
   }
 
-  static RAoperator lookFor({RAnavigator nav, String table, bool reset = true, bool left = true}) {
+  static void loop(RAnavigator nav, Function(RAoperator) func) {
+    nav.goTop();
+    while (!nav.isLeaf) {
+      func(nav.expression);
+      if (nav.isBranch) {
+        var nav2 = RAnavigator(nav.expression);
+        loop(nav2, func);
+        loop(nav, func);
+      } else {
+        nav.goDown();
+      }
+    }
+  }
+
+  static RAoperator lookFor({RAnavigator nav, String table, bool reset = true, bool left = true, Function(RAoperator) func}) {
     if (reset) nav.goTop();
     while (!nav.isLeaf) {
-      if (nav.expression.source is String) {
-        String source = nav.expression.source;
-        if (source == table) return nav.expression;
+      if (func != null) func(nav.expression);
+      if (nav.isBranch) {
+        var nav2 = RAnavigator(nav.expression);
+        var result = lookFor(nav: nav2, table: table, reset: false, func: func);
+        if (result != null) return result;
+        result = lookFor(nav: nav, table: table, left: false, reset: false, func: func);
+        return result;
       } else {
-        if (nav.isBranch) {
-          var nav2 = RAnavigator(nav.expression);
-          var result = lookFor(nav: nav2, table: table);
-          if (result != null) return result;
-          result = lookFor(nav: nav, table: table, left: false);
-          return result;
-        } else {
-          nav.goDown();
-        }
+        nav.goDown(left: left);
       }
+    }
+    if (nav.expression.source is String) {
+      String source = nav.expression.source;
+      if (source == table) return nav.expression;
     }
     return null;
   }
