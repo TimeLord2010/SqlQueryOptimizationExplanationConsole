@@ -1,7 +1,9 @@
 import 'dart:convert';
 
 import 'package:console/console.dart' as console;
+import 'package:console/queryOptimizer/queryOptimizer.dart';
 import 'package:console/relationalAlgebra/util/raExpression.dart';
+import 'package:console/relationalAlgebra/util/raOperator.dart';
 import 'package:console/sql/sintax parser/sqlParser.dart';
 import 'package:console/sql/lexer parser/sqlLexerParser.dart';
 
@@ -18,6 +20,9 @@ Future processSqls(List<String> sqls) async {
     await checkLexaly(parser);
     var ra = sqlToRelationalAlgebra(parser);
     print(ra.toString());
+    print('is expression: ${ra is RAexpression}');
+    print('is operator: ${ra is RAoperator}');
+    optimize(op: ra, tables: parser.getTables().toList());
     //var j = parser.toJson();
     //print(getPrettyJSONString(j));
     print('');
@@ -31,7 +36,8 @@ void main(List<String> arguments) async {
   a += 'from Movimentacao ';
   a += 'join TipoMovimento on TipoMovimento.idTipoMovimento = Movimentacao.TipoMovimento_idTipoMovimento ';
   a += 'join Categoria on Categoria.idCategoria = Movimentacao.Categoria_idCategoria ';
-  a += 'join Contas on Contas.idConta = Movimentacao.Contas_idConta;';
+  a += 'join Contas on Contas.idConta = Movimentacao.Contas_idConta ';
+  a += "where TipoMovimento.DescMovimentacao = 'Débito' and Categoria.DescCategoria = 'Salário' and Valor > 10 and Contas.Descricao = 'Bitcoin';";
   var sts = [
     //'select * from Usuario;',
     //'select Nome, Número,Bairro , CEP from Usuario;',
