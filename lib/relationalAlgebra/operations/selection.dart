@@ -13,6 +13,8 @@ class Selection implements RAoperator {
 
   Conditional condition;
 
+  Selection ();
+
   Selection.fromSql(WhereStatement where, String defaultTable) {
     condition = Conditional.fromWhereStatement(where, defaultTable);
   }
