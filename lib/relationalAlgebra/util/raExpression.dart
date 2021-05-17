@@ -18,10 +18,10 @@ RAexpression sqlToRelationalAlgebra(SqlParser parsed) {
     if (parsed.join == null) {
       selection.source = parsed.table;
     } else {
-      selection.source = ThetaJoin.build(parsed.join, parsed.table);
+      selection.source = ThetaJoin.reverse(ThetaJoin.build(parsed.join, parsed.table));
     }
   } else if (parsed.join != null) {
-	  projection.source = ThetaJoin.build(parsed.join, parsed.table);
+	  projection.source = ThetaJoin.reverse(ThetaJoin.build(parsed.join, parsed.table));
   } else {
 	  projection.source = parsed.table;
   }
