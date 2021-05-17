@@ -66,7 +66,7 @@ class WhereStatement {
   static void loop(WhereStatement where, Function(WhereStatementUnit) func) {
     if (where == null) return;
     if (where.left is WhereStatement) {
-      loop(where, func);
+      loop(where.left, func);
     } else if (where.left is WhereStatementUnit) {
       func(where.left);
     }
