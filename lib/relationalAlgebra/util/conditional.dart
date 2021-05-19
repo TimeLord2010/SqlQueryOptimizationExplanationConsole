@@ -19,9 +19,77 @@ class Conditional {
     if (units.length == 2) {
       and = true;
       right = units.elementAt(1);
-    } else {
+    } else if (units.length > 1) {
       and = true;
       right = Conditional.fromUnits(units.skip(1), p: this);
+    }
+  }
+
+  // if return true, delete entira conditional
+  static bool remove(Conditional conditional, Iterable<ConditionalUnit> units) {
+    for (var unit in units) {
+      if (conditional.left is Conditional) {
+        var result = remove(conditional.left, [unit]);
+        if (result) return true;
+      } else if (conditional.left is ConditionalUnit) {
+        if (conditional.left == unit) {
+          conditional.left = null;
+          return fix(conditional, true);
+        }
+      }
+      if (conditional.right is Conditional) {
+        var result = remove(conditional.right, [unit]);
+        if (result) return true;
+      } else if (conditional.right is ConditionalUnit) {
+        if (conditional.right == unit) {
+          conditional.right = null;
+          return fix(conditional, false);
+        }
+      }
+    }
+    return false;
+  }
+
+  // if return true, delete entire conditional
+  static bool fix(Conditional conditional, bool left) {
+    var parent = conditional.parent;
+    if (left) {
+      if (conditional.right != null) {
+        conditional.left = conditional.right;
+        return false;
+      } else {
+        if (parent == null) {
+          return true;
+        } else {
+          if (parent.left == conditional) {
+            parent.left = null;
+            return fix(parent, true);
+          } else if (parent.right == conditional) {
+            parent.right = null;
+            return fix(parent, false);
+          } else {
+            throw Exception("couldn't find conditional.");
+          }
+        }
+      }
+    } else {
+      if (conditional.left != null) {
+        return false;
+      } else {
+        if (parent == null) {
+          return true;
+        } else {
+          if (parent.left == conditional) {
+            parent.left = null;
+            return fix(parent, true);
+          } else if (parent.right == conditional) {
+            parent.right = null;
+            return fix(parent, false);
+          } else {
+            throw Exception("couldn't find conditional.");
+          }
+        }
+      }
     }
   }
 
