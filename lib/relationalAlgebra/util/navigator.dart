@@ -2,9 +2,8 @@ import 'package:console/relationalAlgebra/util/raOperator.dart';
 import 'package:console/relationalAlgebra/util/raRelationalOperator.dart';
 
 class RAnavigator {
-  
-  List<RAoperator> ancestors;
-  RAoperator expression;
+  List<dynamic> ancestors = [];
+  dynamic expression;
   int level = 0;
 
   bool get isTop {
@@ -16,28 +15,32 @@ class RAnavigator {
   }
 
   bool get isBranch {
-    return expression is RArelationalOperator;
+    return ['⋈θ', '×', '⋈'].contains(expression.symbol);
+    //return expression is RArelationalOperator;
   }
 
-  RAnavigator(RAoperator op) {
+  RAnavigator(op) {
+    if (op is String) {
+      throw Exception('String $op is not a valid argument type.');
+    }
     expression = op;
   }
 
-  void goDown({bool left = true}) {
-    if (expression.source is RAoperator) {
-      ancestors.add(expression);
-      level += 1;
-      if (isBranch) {
-        RArelationalOperator relational = expression.source;
-        if (left) {
-          expression = relational.source;
-        } else {
-          expression = relational.source2;
-        }
+  bool goDown({bool left = true}) {
+    if (expression == null || expression.source is String) return false;
+    ancestors.add(expression);
+    level += 1;
+    if (isBranch) {
+      RArelationalOperator relational = expression.source;
+      if (left) {
+        expression = relational.source;
       } else {
-        expression = expression.source;
+        expression = relational.source2;
       }
+    } else {
+      expression = expression.source;
     }
+    return true;
   }
 
   void goUp() {
@@ -53,37 +56,86 @@ class RAnavigator {
     }
   }
 
-  static void loop(RAnavigator nav, Function(RAoperator) func) {
-    nav.goTop();
+  void remove (op) {
+    if (['⋈θ', '×', '⋈'].contains(op.symbol)) {
+      throw Exception('The operation remove does not support branch operators.');
+    }
+    loop(this, (item, parent) {
+      if (item == op) {
+        parent.source = item.source;
+      }
+    });
+  }
+
+  static void loop(RAnavigator nav, Function(dynamic, dynamic) func, {bool shouldGoTop = true}) {
+    if (shouldGoTop) nav.goTop();
     while (!nav.isLeaf) {
-      func(nav.expression);
+      var parent = nav.ancestors.isEmpty ? null: nav.ancestors.last;
+      func(nav.expression, parent);
       if (nav.isBranch) {
-        var nav2 = RAnavigator(nav.expression);
-        loop(nav2, func);
-        loop(nav, func);
+        if (nav.expression.source is String) {
+          func(nav.expression.source, parent);
+          break;
+        } else {
+          loop(RAnavigator(nav.expression.source), func, shouldGoTop: false);
+        }
+        if (nav.expression.source2 is String) {
+          func(nav.expression.source2, parent);
+          break;
+        } else {
+          loop(RAnavigator(nav.expression.source2), func, shouldGoTop: false);
+        }
       } else {
-        nav.goDown();
+        if (nav.expression == null || nav.expression.source is String) {
+          break;
+        } else {
+          nav.goDown();
+        }
       }
     }
   }
 
-  static RAoperator lookFor({RAnavigator nav, String table, bool reset = true, bool left = true, Function(RAoperator) func}) {
+  static dynamic lookFor({RAnavigator nav, String table, bool reset = true, bool left = true, Function(RAoperator) func}) {
+    // print('----');
+    // print('looking for: $table');
+    // print('expression: ${nav.expression}');
     if (reset) nav.goTop();
-    while (!nav.isLeaf) {
+    // if (nav.expression.source is String) {
+    //   String source = nav.expression.source;
+    //   if (source == table) return nav.expression;
+    //   return null;
+    // }
+    while (true) {
       if (func != null) func(nav.expression);
+      // print('while expression: ${nav.expression}');
+      // print('is branch ${nav.isBranch}');
       if (nav.isBranch) {
-        var nav2 = RAnavigator(nav.expression);
-        var result = lookFor(nav: nav2, table: table, reset: false, func: func);
-        if (result != null) return result;
-        result = lookFor(nav: nav, table: table, left: false, reset: false, func: func);
-        return result;
+        if (nav.expression.source is String) {
+          if (nav.expression.source == table) {
+            //print('found! Expression: ${nav.expression}');
+            return nav.expression;
+          }
+        } else {
+          //print('checking left source: ${nav.expression.source}');
+          var result = lookFor(nav: RAnavigator(nav.expression.source), table: table, reset: false, func: func);
+          if (result != null) return result;
+        }
+        if (nav.expression.source2 is String) {
+          return nav.expression.source2 == table ? nav.expression : null;
+        } else {
+          //print('checking left source2: ${nav.expression.source2}');
+          return lookFor(nav: RAnavigator(nav.expression.source2), table: table, left: false, reset: false, func: func);
+        }
       } else {
-        nav.goDown(left: left);
+        if (nav.expression == null || nav.expression.source is String) {
+          if (nav.expression.source is String && nav.expression.source == table) {
+            return nav.expression;
+          }
+          break;
+        } else {
+          nav.goDown(left: left);
+        }
       }
-    }
-    if (nav.expression.source is String) {
-      String source = nav.expression.source;
-      if (source == table) return nav.expression;
     }
     return null;
   }
