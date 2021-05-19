@@ -1,4 +1,4 @@
-import 'package:console/relationalAlgebra/util/RAoperator.dart';
+import 'package:console/relationalAlgebra/util/raOperator.dart';
 import 'package:console/relationalAlgebra/util/column.dart';
 import 'package:console/relationalAlgebra/util/dataSet.dart';
 
