@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:console/console.dart' as console;
 import 'package:console/queryOptimizer/queryOptimizer.dart';
 import 'package:console/relationalAlgebra/util/raExpression.dart';
-import 'package:console/relationalAlgebra/util/raOperator.dart';
 import 'package:console/sql/sintax parser/sqlParser.dart';
 import 'package:console/sql/lexer parser/sqlLexerParser.dart';
 
@@ -15,16 +14,13 @@ String getPrettyJSONString(jsonObject) {
 Future processSqls(List<String> sqls) async {
   print('');
   for (var sql in sqls) {
-    print(sql);
+    print(sql + '\n');
     var parser = SqlParser(sql);
     await checkLexaly(parser);
     var ra = sqlToRelationalAlgebra(parser);
-    print(ra.toString());
-    print('is expression: ${ra is RAexpression}');
-    print('is operator: ${ra is RAoperator}');
-    optimize(op: ra, tables: parser.getTables().toList());
-    //var j = parser.toJson();
-    //print(getPrettyJSONString(j));
+    print(ra.toString() + '\n');
+    var optimized = optimize(op: ra, tables: parser.getTables().toList());
+    print('optimized: $optimized\n');
     print('');
   }
 }
