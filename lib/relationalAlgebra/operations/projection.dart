@@ -12,6 +12,11 @@ class Projection implements RAoperator {
 
   List<Column> outputColumns;
 
+  Projection.fromColumns(Iterable<Column> columns, s) {
+    outputColumns = columns;
+    source = s;
+  }
+
   Projection(String defaultTable, List<String> cols) {
     outputColumns = [];
     for (var col in cols) {
